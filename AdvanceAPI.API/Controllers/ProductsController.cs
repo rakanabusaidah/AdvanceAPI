@@ -17,10 +17,21 @@ namespace AdvanceAPI.API.Controllers
             _context.Database.EnsureCreated();
         }
 
+
         [HttpGet]
-        public async Task<ActionResult> GetAllProducts()
+        public async Task<ActionResult> GetAllProducts([FromQuery] QueryParameters? queryParameters)
         {
-            return Ok(await _context.Products.ToArrayAsync());
+            IQueryable<Product> products = _context.Products;
+            if (queryParameters != null)
+            {
+
+                products = products
+                    .Skip(queryParameters.Size * (queryParameters.Page - 1))
+                    .Take(queryParameters.Size);
+
+                return Ok(await products.ToArrayAsync());
+            }
+            return Ok(await products.ToArrayAsync());
         }
 
         [HttpGet("{id}")]
@@ -70,7 +81,7 @@ namespace AdvanceAPI.API.Controllers
                 if (!_context.Products.Any(p => p.Id == id))
                 {
                     return NotFound();
-                } 
+                }
                 else
                 {
                     throw;
@@ -97,7 +108,7 @@ namespace AdvanceAPI.API.Controllers
 
         [HttpPost]
         [Route("Delete")]
-        public async Task<ActionResult> DeleteMultiple([FromQuery]int[] ids)
+        public async Task<ActionResult> DeleteMultiple([FromQuery] int[] ids)
         {
             var products = new List<Product>();
             foreach (var id in ids)
