@@ -23,17 +23,28 @@ namespace AdvanceAPI.API.Controllers
         public async Task<ActionResult> GetAllProducts([FromQuery] ProductQueryParameters? productQueryParameters)
         {
             IQueryable<Product> products = _context.Products;
-            
-            if(productQueryParameters?.MinPrice != null)
+
+            if (productQueryParameters?.MinPrice != null)
             {
                 products = products.Where(
                     p => p.Price >= productQueryParameters.MinPrice.Value);
             }
-            if(productQueryParameters?.MaxPrice != null)
+            if (productQueryParameters?.MaxPrice != null)
             {
                 products = products.Where(
                     p => p.Price <= productQueryParameters.MaxPrice.Value);
             }
+            if (!string.IsNullOrEmpty(productQueryParameters?.Sku))
+            {
+                products = products.Where(
+                    p => p.Sku.ToLower() == productQueryParameters.Sku.ToLower());
+            }
+            if (!string.IsNullOrEmpty(productQueryParameters?.Name))
+            {
+                products = products.Where(
+                    p => p.Name.ToLower().Contains(productQueryParameters.Name.ToLower()));
+            }
+
             if (productQueryParameters != null)
             {
 
