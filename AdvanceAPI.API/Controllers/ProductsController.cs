@@ -1,4 +1,5 @@
 ﻿using AdvanceAPI.API.Models;
+using AdvanceAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,15 +20,26 @@ namespace AdvanceAPI.API.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult> GetAllProducts([FromQuery] QueryParameters? queryParameters)
+        public async Task<ActionResult> GetAllProducts([FromQuery] ProductQueryParameters? productQueryParameters)
         {
             IQueryable<Product> products = _context.Products;
-            if (queryParameters != null)
+            
+            if(productQueryParameters?.MinPrice != null)
+            {
+                products = products.Where(
+                    p => p.Price >= productQueryParameters.MinPrice.Value);
+            }
+            if(productQueryParameters?.MaxPrice != null)
+            {
+                products = products.Where(
+                    p => p.Price <= productQueryParameters.MaxPrice.Value);
+            }
+            if (productQueryParameters != null)
             {
 
                 products = products
-                    .Skip(queryParameters.Size * (queryParameters.Page - 1))
-                    .Take(queryParameters.Size);
+                    .Skip(productQueryParameters.Size * (productQueryParameters.Page - 1))
+                    .Take(productQueryParameters.Size);
 
                 return Ok(await products.ToArrayAsync());
             }
