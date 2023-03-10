@@ -44,7 +44,24 @@ namespace AdvanceAPI.API.Controllers
                 products = products.Where(
                     p => p.Name.ToLower().Contains(productQueryParameters.Name.ToLower()));
             }
-
+            if(!string.IsNullOrEmpty(productQueryParameters?.SearchTerm))
+            {
+                products = products.Where(
+                    p => p.Sku.ToLower().Contains(productQueryParameters.Sku.ToLower())
+                    || p.Name.ToLower().Contains(productQueryParameters.Name.ToLower())
+                    );
+            }
+            if(!string.IsNullOrEmpty(productQueryParameters?.SortBy))
+            {
+                // to check of the property is correct and exists in product
+                if(typeof(Product).GetProperty(productQueryParameters.SortBy) != null)
+                {
+                    products = products.OrderByCustom(
+                        productQueryParameters.SortBy,
+                        productQueryParameters.SortOrder
+                        );
+                }
+            }
             if (productQueryParameters != null)
             {
 
